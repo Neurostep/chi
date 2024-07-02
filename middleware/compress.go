@@ -161,6 +161,10 @@ func (c *Compressor) SetEncoder(encoding string, fn EncoderFunc) {
 
 	// If the encoder supports Resetting (IoReseterWriter), then it can be pooled.
 	encoder := fn(ioutil.Discard, c.level)
+	// Release resources of the created encoder
+	if enc, ok := encoder.(io.WriteCloser); ok {
+		defer enc.Close()
+	}
 	if encoder != nil {
 		if _, ok := encoder.(ioResetterWriter); ok {
 			pool := &sync.Pool{
